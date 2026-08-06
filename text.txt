@@ -1,0 +1,23 @@
+Write a shell script that reads command line arguments and prints the number of arguments.
+Given this sequence of words as command line arguments “To the OS Laboratory at Alpha
+Lab Welcome”, the script should echo back the information that there are 8 arguments.
+Additionally it should echo back some of the arguments in the following order: “Welcome To
+the OS Laboratory at Alpha Lab”
+2. Write a shell script that asks for the values of 2 variables: userv1 and userv2, from the user
+and takes in any type (real/integer/character/string). Try to perform the following operations
+on the variables: (a) add, (b) multiply (c) subtract (d) division (e) printing the variables in
+reverse order. Print appropriate error message/s if the operation cannot be performed,
+otherwise print the result: “the sum of ‘userv1’ and ‘userv2’ is ....”. Execute the shell script
+as many number of times the user wants. Show all possible combinations of the types of
+variables and result/s of the corresponding operation/s.
+3. Write a shell script a) to find out the total count of files and directories in any directory. b)
+Also list the file and directory names separately with the respective counts. c) The script
+should also print out the total size of the files created in the past week.
+4. Write a shell script that counts and prints the total number of files in a particular directory and
+in all of its sub-directories. Also (i) print total no. of files (not directories) in each
+subdirectory with the name of the subdirectory, (ii) print only those file names that have been
+created within the past week.
+
+public static void main
+int main
+class javaprog
