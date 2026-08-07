@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <stdint.h>
 #include "error_detection.h"
 
 #include "error_detection.h"
@@ -19,7 +20,6 @@
 #define PORT "3000"
 #define BACKLOG 10
 #define PACKET_SIZE 64
-#define PAYLOADSIZE 44
 #define PAYLOADSIZE 44
 #define MACSIZE 6
 
@@ -98,7 +98,7 @@ int start_server(){
     struct addrinfo hints, *servinfo, *p;//those specs are in hints, valid ones will be in servinfo and p is iterator
 
     //string text
-    const char * text = "Hello from server";
+    const char * text = "Bye from server";
     const char * browsertext = "HTTP/1.1 200 OK\r\n"
     "Content-Type: text/plain\r\n"
     "Content-Length: 17\r\n"
@@ -184,25 +184,56 @@ int start_server(){
         char buffer[PACKET_SIZE];
         ssize_t bytes_received;
 
-        int bytes_received = 0;
         int all_bytes_good=1;
+        int total_packets_received=0;
         while ((bytes_received = recv_all(new_fd, buffer, PACKET_SIZE)) > 0) {
 
             if (bytes_received == PACKET_SIZE) {
-                unsigned short received_checksum;
-                unsigned short calculated_checksum;
+                uint32_t header;
+                int checktype;
+                int payload_len;
+                int data_len = 2 * MACSIZE + sizeof header + PAYLOADSIZE;
+                uint32_t received_value;
+                uint32_t calculated_value;
 
-                received_checksum = ((unsigned char)buffer[62] << 8) |
-                                    (unsigned char)buffer[63];
-                calculated_checksum = checksum(buffer, 2*MACSIZE+sizeof(int)+PAYLOADSIZE);
+                memcpy(&header, buffer + 2 * MACSIZE, sizeof header);
+                header = ntohl(header);
+                checktype = (int)(header >> 24);
+                payload_len = (int)(header & 0x00ffffffU);
 
-                if (calculated_checksum == received_checksum) {
-                    printf("checksum: OK\n");
+                if (payload_len < 0 || payload_len > PAYLOADSIZE ||
+                    checktype < 0 || checktype > 2) {
+                    printf("invalid packet metadata: type=%d, payload length=%d\n",
+                           checktype, payload_len);
+                    all_bytes_good = 0;
                 } else {
-                    printf("checksum: ERROR\n");
-                    printf("calculated: %04X, received: %04X\n",
-                           calculated_checksum, received_checksum);
-                    all_bytes_good=0;
+                    if (checktype == 0) {
+                        received_value = ((unsigned char)buffer[62] << 8) |
+                                          (unsigned char)buffer[63];
+                        calculated_value = checksum(buffer, data_len);
+                        printf("checksum: %s\n",
+                               calculated_value == received_value ? "OK" : "ERROR");
+                    } else if (checktype == 1) {
+                        received_value = ((unsigned char)buffer[62] << 8) |
+                                          (unsigned char)buffer[63];
+                        calculated_value = crc16(buffer, data_len);
+                        printf("CRC-16: %s\n",
+                               calculated_value == received_value ? "OK" : "ERROR");
+                    } else {
+                        received_value = ((uint32_t)(unsigned char)buffer[60] << 24) |
+                                          ((uint32_t)(unsigned char)buffer[61] << 16) |
+                                          ((uint32_t)(unsigned char)buffer[62] << 8) |
+                                          (unsigned char)buffer[63];
+                        calculated_value = crc32(buffer, data_len);
+                        printf("CRC-32: %s\n",
+                               calculated_value == received_value ? "OK" : "ERROR");
+                    }
+
+                    if (calculated_value != received_value) {
+                        printf("calculated: %08X, received: %08X\n",
+                               calculated_value, received_value);
+                        all_bytes_good = 0;
+                    }
                 }
             }
 
@@ -216,8 +247,14 @@ int start_server(){
             if (bytes_received < PACKET_SIZE) {
                 break;  // final partial block
             }
-        }
 
+            total_packets_received++;
+        }
+        if (!all_bytes_good) {
+            printf("some checksum error detected\n");
+        }
+        printf("total packets received: %d\n", total_packets_received);
+        send_message(new_fd,text);
 
         close(new_fd);//close FD
         printf("server: conn closed\n");

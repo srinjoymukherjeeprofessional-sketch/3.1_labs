@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <stdint.h>
 #include "error_detection.h"
 #include "error_injection.h"
 
@@ -20,7 +21,7 @@ char* PORT = "3000"; // the port client will be connecting to
 #define PACKET_SIZE 64 // Same as server packet size
 #define MACSIZE 6	
 
-char* make_packet(const char* buffer, int payload_len);
+char* make_packet(const char* buffer, int payload_len, int checktype);
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -34,7 +35,7 @@ void *get_in_addr(struct sockaddr *sa)
 
 // reads a file and sends it in packets of size PAYLOADSIZE
 int send_file_in_packets(int sockfd, const char* filename,
-                         int mode, int burst_length) {
+                         int mode, int burst_length, int checktype) {
     FILE* file = fopen(filename, "rb");
     if (file == NULL) {
         perror("Failed to open file");
@@ -47,9 +48,11 @@ int send_file_in_packets(int sockfd, const char* filename,
     // Read and send loop: 64 bytes at a time
     while ((bytes_read = fread(buffer, 1, PAYLOADSIZE, file)) > 0) {
         int total_sent = 0;
+
+        printf("packet %d payload length: %zu bytes\n", packets + 1, bytes_read);
 		
 		char* payload;
-		payload = make_packet(buffer, bytes_read);
+		payload = make_packet(buffer, bytes_read, checktype);
 		if (payload == NULL) {
 			fprintf(stderr, "failed to create packet\n");
 			fclose(file);
@@ -70,6 +73,13 @@ int send_file_in_packets(int sockfd, const char* filename,
             if (bytes_sent == -1) {
                 perror("send failed");
                 fclose(file);
+                free(payload);
+                return -1;
+            }
+            if (bytes_sent == 0) {
+                fprintf(stderr, "send returned 0\n");
+                fclose(file);
+                free(payload);
                 return -1;
             }
             total_sent += bytes_sent;
@@ -90,31 +100,50 @@ int send_file_in_packets(int sockfd, const char* filename,
 }
 
 //buffer contains the payload
-char* make_packet(const char* buffer, int payload_len)
+char* make_packet(const char* buffer, int payload_len, int checktype)
 {
     char dest_mac[MACSIZE] = {'A','A','B','B','C','C'};
     char src_mac[MACSIZE]  = {'X','Y','Z','Y','Z','X'};
 
     char *packet = (char *)malloc(PACKET_SIZE);
+    if (packet == NULL) {
+        return NULL;
+    }
     memset(packet, 0, PACKET_SIZE); // zero the padding tail
     char *ptr = packet;//just copy 
 
     memcpy(ptr, dest_mac, MACSIZE);         ptr += MACSIZE;
     memcpy(ptr, src_mac, MACSIZE);          ptr += MACSIZE;
-    memcpy(ptr, &payload_len, sizeof(int)); ptr += sizeof(int);
+    /* Store detection type in the top byte and payload length in the
+     * lower 24 bits of the four-byte length field. */
+    uint32_t header = htonl(((uint32_t)checktype << 24) |
+                            (uint32_t)payload_len);
+    memcpy(ptr, &header, sizeof header);    ptr += sizeof header;
     memcpy(ptr, buffer, payload_len);       ptr += PAYLOADSIZE;
 
-    unsigned short cs;
-
-    // memcpy(padded_payload, buffer, payload_len);
-    cs = checksum(packet, 2*MACSIZE+sizeof(int)+PAYLOADSIZE);
-
-
-    // big endian checksum: 00 00 CC CC.
-    ptr[0] = 0;
-    ptr[1] = 0;
-    ptr[2] = (char)((cs >> 8) & 0xff);
-    ptr[3] = (char)(cs & 0xff);
+    // The detection value covers the headers and the full padded payload.
+    if (checktype == 0) {
+        unsigned short value = checksum(packet, 2*MACSIZE +
+                                         sizeof header + PAYLOADSIZE);
+        ptr[0] = 0;
+        ptr[1] = 0;
+        ptr[2] = (char)((value >> 8) & 0xff);
+        ptr[3] = (char)(value & 0xff);
+    } else if (checktype == 1) {
+        unsigned short value = crc16(packet, 2*MACSIZE +
+                                     sizeof header + PAYLOADSIZE);
+        ptr[0] = 0;
+        ptr[1] = 0;
+        ptr[2] = (char)((value >> 8) & 0xff);
+        ptr[3] = (char)(value & 0xff);
+    } else {
+        unsigned int value = crc32(packet, 2*MACSIZE +
+                                    sizeof header + PAYLOADSIZE);
+        ptr[0] = (char)((value >> 24) & 0xff);
+        ptr[1] = (char)((value >> 16) & 0xff);
+        ptr[2] = (char)((value >> 8) & 0xff);
+        ptr[3] = (char)(value & 0xff);
+    }
 
     return packet;
 }
@@ -126,10 +155,9 @@ int send_message(int sock_fd, const char* msg){
 
 int main(int argc, char *argv[])
 {
-	int sockfd, numbytes;  
-	int mode;
+	int sockfd;
+	int mode, checktype;
 	int burst_length = 0;
-	char buf[PAYLOADSIZE];
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
 	char s[INET6_ADDRSTRLEN];
@@ -159,6 +187,18 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	printf("Choose error detection type:\n");
+	printf("0 = checksum\n");
+	printf("1 = CRC-16\n");
+	printf("2 = CRC-32\n");
+	printf("Enter check type: ");
+	if (scanf("%d", &checktype) != 1 ||
+	    checktype < 0 || checktype > 2) {
+		fprintf(stderr, "Invalid error detection type\n");
+		return 1;
+	}
+
+	/* The receiver currently validates the checksum field only. */
     //define hints struct specify what kind of server we want
     //works fine without hints too in this case 
 	memset(&hints, 0, sizeof hints);
@@ -219,10 +259,27 @@ int main(int argc, char *argv[])
 
 	const char* filename = FILENAME; // Specify your file name here
 	seed_error_injection();
-	if (send_file_in_packets(sockfd, filename, mode, burst_length) == -1) {
+	if (send_file_in_packets(sockfd, filename, mode, burst_length, checktype) == -1) {
 		close(sockfd);
 		exit(1);
 	}
+
+	/* Tell the receiver that no more packet bytes will be sent.  Without this half-close, recv_all() on the receiver keeps waiting for the next 64-byte packet, while we wait for its response below. */
+	if (shutdown(sockfd, SHUT_WR) == -1) {
+		perror("shutdown");
+		close(sockfd);
+		return 1;
+	}
+
+	char server_msg[PAYLOADSIZE];
+	ssize_t reply_bytes = recv(sockfd, server_msg, sizeof(server_msg) - 1, 0);
+	if (reply_bytes < 0) {
+		perror("recv reply");
+		close(sockfd);
+		return 1;
+	}
+	server_msg[reply_bytes] = '\0';
+	printf("received: '%s'\n", server_msg);
 
 	close(sockfd);
 
