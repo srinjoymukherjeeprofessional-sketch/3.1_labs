@@ -202,6 +202,7 @@ int start_server(){
                     printf("checksum: ERROR\n");
                     printf("calculated: %04X, received: %04X\n",
                            calculated_checksum, received_checksum);
+                    all_bytes_good=0;
                 }
             }
 
