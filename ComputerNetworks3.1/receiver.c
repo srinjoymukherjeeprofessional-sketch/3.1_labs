@@ -17,7 +17,6 @@
 #include "error_detection.h"
 
 #define PORT "3000"
-#define URL 127.0.0.1
 #define BACKLOG 10
 #define PACKET_SIZE 64
 #define PAYLOADSIZE 44
@@ -111,7 +110,7 @@ int start_server(){
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC; // suport both IPv4/6
     hints.ai_socktype = SOCK_STREAM; // stream connection, tcp
-    hints.ai_flags = AI_PASSIVE; //will listen at host IP
+    hints.ai_flags = AI_PASSIVE; //binding to 'any' interface
 
     //catch errors
     int rv;
@@ -185,6 +184,8 @@ int start_server(){
         char buffer[PACKET_SIZE];
         ssize_t bytes_received;
 
+        int bytes_received = 0;
+        int all_bytes_good=1;
         while ((bytes_received = recv_all(new_fd, buffer, PACKET_SIZE)) > 0) {
 
             if (bytes_received == PACKET_SIZE) {
@@ -215,6 +216,8 @@ int start_server(){
                 break;  // final partial block
             }
         }
+
+
         close(new_fd);//close FD
         printf("server: conn closed\n");
         iterations++;
