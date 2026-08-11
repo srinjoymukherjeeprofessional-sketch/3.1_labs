@@ -1,5 +1,7 @@
 // help and reference: https://beej.us/guide/bgnet/html/split
 
+#define _POSIX_C_SOURCE 200112L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
