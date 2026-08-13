@@ -199,7 +199,9 @@ int main(int argc, char *argv[])
     if (argc == 3) {
         PORT = argv[2];
     }
-
+/*	getaddrinfo translates a URL/hostname (argv[1]) or 
+IP address into a list of remote destination socket 
+addresses using the OS name service.*/
 	if ((rv = getaddrinfo(argv[1], (const char *)PORT, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;

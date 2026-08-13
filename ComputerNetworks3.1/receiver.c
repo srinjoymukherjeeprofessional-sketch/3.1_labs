@@ -112,10 +112,11 @@ int start_server(){
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC; // suport both IPv4/6
     hints.ai_socktype = SOCK_STREAM; // stream connection, tcp
-    hints.ai_flags = AI_PASSIVE; //binding to 'any' interface
+    hints.ai_flags = AI_PASSIVE; //binding to 'any' interface - Tell it to listen on all local network interfaces/cards
 
     //catch errors
     int rv;
+    /*NULL + AI_PASSIVE: Tells the OS, "I don't have a specific remote URL to connect to; give me a local address that listens on all available network hardware interfaces (INADDR_ANY)."*/
     if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
         printf("getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
