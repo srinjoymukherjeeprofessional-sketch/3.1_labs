@@ -6,6 +6,10 @@ void seed_error_injection(void) {
     srand((unsigned int)time(NULL));
 }
 
+void seed_error_injection_value(unsigned int seed) {
+    srand(seed);
+}
+
 int inject_at_position(char *packet, int packet_size, int position) {
     // Returns 0 if successful, 1 if the position is invalid.
     if (position < 0 || position >= packet_size) {

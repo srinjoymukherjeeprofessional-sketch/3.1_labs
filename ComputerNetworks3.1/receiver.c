@@ -15,6 +15,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <stdint.h>
+#include <time.h>
 #include "error_detection.h"
 
 #include "error_detection.h"
@@ -95,6 +96,7 @@ int start_server(){
     //A file descriptor (FD) is a non-negative integer that the Unix kernel returns to a process to act as an abstract handle for an open file or input/output (I/O) resource
     // sock_fd holds the file descriptor for listener
     int sock_fd, new_fd;
+    int evaluation_detail = getenv("EVAL_DETAIL") != NULL;
 
     // addrinfo is the struct used to store the valid configurations returned by OS for what kind specifications i require for my server, using the method getaddrinfo()
     struct addrinfo hints, *servinfo, *p;//those specs are in hints, valid ones will be in servinfo and p is iterator
@@ -198,6 +200,12 @@ int start_server(){
                 int data_len = 2 * MACSIZE + sizeof header + PAYLOADSIZE;
                 uint32_t received_value;
                 uint32_t calculated_value;
+                int packet_detected = 0;
+                struct timespec validation_start;
+                struct timespec validation_end;
+                long long validation_time_ns;
+
+                clock_gettime(CLOCK_MONOTONIC, &validation_start);
 
                 memcpy(&header, buffer + 2 * MACSIZE, sizeof header);
                 header = ntohl(header);
@@ -205,10 +213,11 @@ int start_server(){
                 payload_len = (int)(header & 0x00ffffffU);
 
                 if (payload_len < 0 || payload_len > PAYLOADSIZE ||
-                    checktype < 0 || checktype > 2) {
+                    checktype < 0 || checktype > 3) {
                     printf("invalid packet metadata: type=%d, payload length=%d\n",
                            checktype, payload_len);
                     all_bytes_good = 0;
+                    packet_detected = 1;
                 } else {
                     if (checktype == 0) {
                         received_value = ((unsigned char)buffer[62] << 8) |
@@ -222,7 +231,7 @@ int start_server(){
                         calculated_value = crc16(buffer, data_len);
                         printf("CRC-16: %s\n",
                                calculated_value == received_value ? "OK" : "ERROR");
-                    } else {
+                    } else if (checktype == 2) {
                         received_value = ((uint32_t)(unsigned char)buffer[60] << 24) |
                                           ((uint32_t)(unsigned char)buffer[61] << 16) |
                                           ((uint32_t)(unsigned char)buffer[62] << 8) |
@@ -230,13 +239,30 @@ int start_server(){
                         calculated_value = crc32(buffer, data_len);
                         printf("CRC-32: %s\n",
                                calculated_value == received_value ? "OK" : "ERROR");
+                    } else {
+                        received_value = ((unsigned char)buffer[62] << 8) |
+                                          (unsigned char)buffer[63];
+                        calculated_value = crc10(buffer, data_len);
+                        printf("CRC-10: %s\n",
+                               calculated_value == received_value ? "OK" : "ERROR");
                     }
 
                     if (calculated_value != received_value) {
                         printf("calculated: %08X, received: %08X\n",
                                calculated_value, received_value);
                         all_bytes_good = 0;
+                        packet_detected = 1;
                     }
+                }
+
+                clock_gettime(CLOCK_MONOTONIC, &validation_end);
+                validation_time_ns =
+                    (long long)(validation_end.tv_sec - validation_start.tv_sec) *
+                        1000000000LL +
+                    (long long)(validation_end.tv_nsec - validation_start.tv_nsec);
+                if (evaluation_detail) {
+                    printf("EVAL_RESULT checktype=%d detected=%d time_ns=%lld\n",
+                           checktype, packet_detected, validation_time_ns);
                 }
             }
 

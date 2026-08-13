@@ -12,6 +12,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <stdint.h>
 #include "error_detection.h"
 #include "error_injection.h"
 
@@ -103,7 +104,9 @@ char* make_packet(const char* buffer, int payload_len, int checktype)
 
     memcpy(ptr, dest_mac, MACSIZE);         ptr += MACSIZE;
     memcpy(ptr, src_mac, MACSIZE);          ptr += MACSIZE;
-    memcpy(ptr, &payload_len, sizeof(int)); ptr += sizeof(int);
+    uint32_t header = htonl(((uint32_t)checktype << 24) |
+                            (uint32_t)payload_len);
+    memcpy(ptr, &header, sizeof header);    ptr += sizeof header;
     memcpy(ptr, buffer, payload_len);       ptr += PAYLOADSIZE;
 
 	if (checktype==0){
@@ -137,6 +140,13 @@ char* make_packet(const char* buffer, int payload_len, int checktype)
 		ptr[1]=(char)((crc >> 16) & 0xff);
 		ptr[2]=(char)((crc >> 8) & 0xff);
 		ptr[3]=(char)(crc & 0xff);
+	}else if (checktype==3){
+		unsigned short crc = crc10(packet, 2*MACSIZE+sizeof(header)+PAYLOADSIZE);
+
+		ptr[0] = 0;
+		ptr[1] = 0;
+		ptr[2] = (char)((crc >> 8) & 0xff);
+		ptr[3] = (char)(crc & 0xff);
 	}
 
     return packet;
@@ -187,8 +197,12 @@ int main(int argc, char *argv[])
 	printf("0 = checksum\n");
 	printf("1 = CRC-16\n");
 	printf("2 = CRC-32\n");
+	printf("3 = CRC-10 (ATM, polynomial 0x233)\n");
 
-	scanf("%d", &checktype);
+	if (scanf("%d", &checktype) != 1 || checktype < 0 || checktype > 3) {
+		fprintf(stderr, "Invalid error detection type\n");
+		return 1;
+	}
 
     //define hints struct specify what kind of server we want
     //works fine without hints too in this case 
@@ -251,7 +265,14 @@ addresses using the OS name service.*/
 	// printf("client: received '%s'\n",buf);
 
 	const char* filename = FILENAME; // Specify your file name here
-	seed_error_injection();
+	{
+		const char *evaluation_seed = getenv("ERROR_INJECTION_SEED");
+		if (evaluation_seed != NULL) {
+			seed_error_injection_value((unsigned int)strtoul(evaluation_seed, NULL, 10));
+		} else {
+			seed_error_injection();
+		}
+	}
 	if (send_file_in_packets(sockfd, filename, mode, burst_length, checktype) == -1) {
 		close(sockfd);
 		exit(1);

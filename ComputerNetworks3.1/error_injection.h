@@ -4,6 +4,7 @@
 
 int inject_at_position(char * ,int, int);
 void seed_error_injection(void);
+void seed_error_injection_value(unsigned int seed);
 int inject_random_position(char *, int);
 int inject_burst(char *, int, int);
 
