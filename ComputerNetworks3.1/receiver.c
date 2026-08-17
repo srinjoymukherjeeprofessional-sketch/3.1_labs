@@ -204,6 +204,8 @@ int start_server(){
                 struct timespec validation_start;
                 struct timespec validation_end;
                 long long validation_time_ns;
+                char packet_hex[PACKET_SIZE * 2 + 1];
+                int hex_index;
 
                 clock_gettime(CLOCK_MONOTONIC, &validation_start);
 
@@ -213,7 +215,7 @@ int start_server(){
                 payload_len = (int)(header & 0x00ffffffU);
 
                 if (payload_len < 0 || payload_len > PAYLOADSIZE ||
-                    checktype < 0 || checktype > 3) {
+                    checktype < 0 || checktype > 4) {
                     printf("invalid packet metadata: type=%d, payload length=%d\n",
                            checktype, payload_len);
                     all_bytes_good = 0;
@@ -239,11 +241,16 @@ int start_server(){
                         calculated_value = crc32(buffer, data_len);
                         printf("CRC-32: %s\n",
                                calculated_value == received_value ? "OK" : "ERROR");
-                    } else {
+                    } else if (checktype == 3) {
                         received_value = ((unsigned char)buffer[62] << 8) |
                                           (unsigned char)buffer[63];
                         calculated_value = crc10(buffer, data_len);
                         printf("CRC-10: %s\n",
+                               calculated_value == received_value ? "OK" : "ERROR");
+                    } else {
+                        received_value = (unsigned char)buffer[63];
+                        calculated_value = crc8(buffer, data_len);
+                        printf("CRC-8: %s\n",
                                calculated_value == received_value ? "OK" : "ERROR");
                     }
 
@@ -261,8 +268,14 @@ int start_server(){
                         1000000000LL +
                     (long long)(validation_end.tv_nsec - validation_start.tv_nsec);
                 if (evaluation_detail) {
-                    printf("EVAL_RESULT checktype=%d detected=%d time_ns=%lld\n",
-                           checktype, packet_detected, validation_time_ns);
+                    for (hex_index = 0; hex_index < PACKET_SIZE; hex_index++) {
+                        snprintf(packet_hex + hex_index * 2, 3, "%02x",
+                                 (unsigned char)buffer[hex_index]);
+                    }
+                    packet_hex[PACKET_SIZE * 2] = '\0';
+                    printf("EVAL_RESULT checktype=%d detected=%d time_ns=%lld packet_hex=%s\n",
+                           checktype, packet_detected, validation_time_ns,
+                           packet_hex);
                 }
             }
 

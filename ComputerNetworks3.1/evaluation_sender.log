@@ -1,0 +1,25 @@
+Choose error injection mode:
+0 = no error
+1 = random single-byte error
+2 = burst error
+Enter mode: Enter burst length in bytes (1-64): Choose error detection type:
+0 = checksum
+1 = CRC-16
+2 = CRC-32
+3 = CRC-10 (ATM, polynomial 0x233)
+4 = CRC-8 (ATM, polynomial 0x07)
+client: attempting connection to 127.0.0.1
+client: connected to 127.0.0.1
+EVAL_ERROR packet=0 start=3 length=33
+EVAL_ERROR packet=1 start=27 length=33
+EVAL_ERROR packet=2 start=4 length=33
+EVAL_ERROR packet=3 start=19 length=33
+EVAL_ERROR packet=4 start=2 length=33
+EVAL_ERROR packet=5 start=14 length=33
+EVAL_ERROR packet=6 start=13 length=33
+EVAL_ERROR packet=7 start=25 length=33
+EVAL_ERROR packet=8 start=2 length=33
+EVAL_ERROR packet=9 start=29 length=33
+EVAL_ERROR packet=10 start=25 length=33
+File sent successfully in packets (11 total).
+received: 'Bye from server'

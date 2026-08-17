@@ -66,6 +66,25 @@ unsigned short crc10(const char *data, int len) {
     return (unsigned short)(crc & 0x3ffU);
 }
 
+// CRC-8/ATM: polynomial 0x07, initial value 0, no reflection, xorout 0.
+unsigned char crc8(const char *data, int len) {
+    unsigned char crc = 0;
+    int i;
+    int bit;
+
+    for (i = 0; i < len; i++) {
+        crc ^= (unsigned char)data[i];
+        for (bit = 0; bit < 8; bit++) {
+            if (crc & 0x80U) {
+                crc = (unsigned char)((crc << 1) ^ 0x07U);
+            } else {
+                crc = (unsigned char)(crc << 1);
+            }
+        }
+    }
+    return crc;
+}
+
 // CRC-32/IEEE:
 // polynomial 0xedb88320 in reflected form, initial value 0xffffffff,
 // reflected input/output, xorout 0xffffffff

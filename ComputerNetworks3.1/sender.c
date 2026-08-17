@@ -47,6 +47,7 @@ int send_file_in_packets(int sockfd, const char* filename,
     char buffer[PAYLOADSIZE];
     size_t bytes_read;
 	int packets = 0;
+    int evaluation_detail = getenv("EVAL_DETAIL") != NULL;
     // Read and send loop: 64 bytes at a time
     while ((bytes_read = fread(buffer, 1, PAYLOADSIZE, file)) > 0) {
         int total_sent = 0;
@@ -65,6 +66,12 @@ int send_file_in_packets(int sockfd, const char* filename,
 			inject_random_position(payload, PACKET_SIZE);
 		} else if (mode == 2) {
 			inject_burst(payload, PACKET_SIZE, burst_length);
+		}
+		if (evaluation_detail) {
+			printf("EVAL_ERROR packet=%d start=%d length=%d\n",
+			       packets, mode == 0 ? -1 : last_error_position(),
+			       mode == 0 ? 0 : last_error_length());
+			fflush(stdout);
 		}
 
 	        // Ensure all bytes of the current packet are sent
@@ -147,6 +154,13 @@ char* make_packet(const char* buffer, int payload_len, int checktype)
 		ptr[1] = 0;
 		ptr[2] = (char)((crc >> 8) & 0xff);
 		ptr[3] = (char)(crc & 0xff);
+	}else if (checktype==4){
+		unsigned char crc = crc8(packet, 2*MACSIZE+sizeof(header)+PAYLOADSIZE);
+
+		ptr[0] = 0;
+		ptr[1] = 0;
+		ptr[2] = 0;
+		ptr[3] = (char)crc;
 	}
 
     return packet;
@@ -198,8 +212,9 @@ int main(int argc, char *argv[])
 	printf("1 = CRC-16\n");
 	printf("2 = CRC-32\n");
 	printf("3 = CRC-10 (ATM, polynomial 0x233)\n");
+	printf("4 = CRC-8 (ATM, polynomial 0x07)\n");
 
-	if (scanf("%d", &checktype) != 1 || checktype < 0 || checktype > 3) {
+	if (scanf("%d", &checktype) != 1 || checktype < 0 || checktype > 4) {
 		fprintf(stderr, "Invalid error detection type\n");
 		return 1;
 	}

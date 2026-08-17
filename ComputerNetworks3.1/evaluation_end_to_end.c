@@ -31,9 +31,10 @@
 #include <unistd.h>
 
 #define TOTAL_CASES 100
-#define SCHEMES 4
+#define SCHEMES 5
 #define TOTAL_TRIALS (TOTAL_CASES * SCHEMES)
 #define RECEIVER_LOG "evaluation_receiver.log"
+#define SENDER_LOG "evaluation_sender.log"
 #define OUTPUT_CSV "evaluation_end_to_end.csv"
 #define PACKET_OUTPUT_CSV "evaluation_packets.csv"
 
@@ -43,7 +44,8 @@ static const char *scheme_name(int checktype)
     case 0: return "checksum";
     case 1: return "crc16";
     case 2: return "crc32";
-    default: return "crc10";
+    case 3: return "crc10";
+    default: return "crc8";
     }
 }
 
@@ -108,10 +110,18 @@ static int run_sender(int mode, int burst_length, int checktype,
     }
     if (pid == 0) {
         char seed_text[32];
+        int sender_log_fd;
 
         close(input_pipe[1]);
         dup2(input_pipe[0], STDIN_FILENO);
         close(input_pipe[0]);
+        sender_log_fd = open(SENDER_LOG, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+        if (sender_log_fd < 0) {
+            _exit(127);
+        }
+        dup2(sender_log_fd, STDOUT_FILENO);
+        dup2(sender_log_fd, STDERR_FILENO);
+        close(sender_log_fd);
         snprintf(seed_text, sizeof seed_text, "%u", seed);
         setenv("ERROR_INJECTION_SEED", seed_text, 1);
         setenv("EVAL_DETAIL", "1", 1);
@@ -137,9 +147,48 @@ static int run_sender(int mode, int burst_length, int checktype,
     return status;
 }
 
+static void parse_sender_errors(int *starts, int *lengths, int capacity)
+{
+    FILE *log = fopen(SENDER_LOG, "r");
+    char line[256];
+    int packet;
+    int start;
+    int length;
+    int i;
+
+    for (i = 0; i < capacity; i++) {
+        starts[i] = -1;
+        lengths[i] = 0;
+    }
+    if (log == NULL) {
+        return;
+    }
+    while (fgets(line, sizeof line, log) != NULL) {
+        if (sscanf(line, "EVAL_ERROR packet=%d start=%d length=%d",
+                   &packet, &start, &length) == 3 &&
+            packet >= 0 && packet < capacity) {
+            starts[packet] = start;
+            lengths[packet] = length;
+        }
+    }
+    fclose(log);
+}
+
+static const char *error_region(int start, int length)
+{
+    int end = start < 0 ? -1 : start + length - 1;
+    if (start < 0) return "none";
+    if (end < 16) return "mac_header";
+    if (start >= 16 && end < 60) return "payload";
+    if (start >= 60) return "integrity_field";
+    return "header_payload_boundary";
+}
+
 static long parse_receiver_output(off_t *offset, FILE *packet_out,
                                   int case_id, unsigned int seed,
                                   int mode, int burst_length, int checktype,
+                                  const int *error_starts,
+                                  const int *error_lengths,
                                   int *validated, int *errors,
                                   int *invalid_metadata)
 {
@@ -164,12 +213,21 @@ static long parse_receiver_output(off_t *offset, FILE *packet_out,
         int result_checktype;
         int detected_error;
         long long time_ns;
+        char packet_hex[129] = "";
+        char *hex_marker;
 
         if (strstr(line, "invalid packet metadata:") != NULL) {
             pending_invalid = 1;
         }
         if (sscanf(line, "EVAL_RESULT checktype=%d detected=%d time_ns=%lld",
                    &result_checktype, &detected_error, &time_ns) == 3) {
+            int current_packet = packet_index++;
+
+            hex_marker = strstr(line, "packet_hex=");
+            if (hex_marker != NULL) {
+                sscanf(hex_marker, "packet_hex=%128s", packet_hex);
+            }
+
             (*validated)++;
             if (detected_error) {
                 (*errors)++;
@@ -178,9 +236,17 @@ static long parse_receiver_output(off_t *offset, FILE *packet_out,
                 (*invalid_metadata)++;
             }
             fprintf(packet_out,
-                    "%d,%d,%u,%s,%d,%s,%d,%d,%d,%d,%lld\n",
-                    case_id, packet_index++, seed, scheme_name(checktype),
+                    "%d,%d,%u,%s,%d,%s,%d,%d,%d,%d,%s,%s,%d,%d,%d,%lld\n",
+                    case_id, current_packet, seed, scheme_name(checktype),
                     checktype, mode_name(mode), burst_length,
+                    error_starts[current_packet],
+                    error_starts[current_packet] < 0 ? -1 :
+                        error_starts[current_packet] +
+                        error_lengths[current_packet] - 1,
+                    error_lengths[current_packet],
+                    error_region(error_starts[current_packet],
+                                 error_lengths[current_packet]),
+                    packet_hex,
                     result_checktype, detected_error, pending_invalid,
                     time_ns);
             pending_invalid = 0;
@@ -218,6 +284,7 @@ int main(void)
     }
     fprintf(packet_out,
             "case_id,packet_index,seed,scheme,checktype,error_mode,burst_length,"
+            "error_start,error_end,error_length,error_region,packet_hex,"
             "receiver_checktype,detected,invalid_metadata,validation_time_ns\n");
     fprintf(out,
             "case_id,trial,seed,scheme,checktype,error_mode,burst_length,validated_packets,"
@@ -246,15 +313,19 @@ int main(void)
         struct rusage usage;
         double wall_ms;
         long log_bytes;
+        int error_starts[64];
+        int error_lengths[64];
         double user_ms;
         double system_ms;
 
         status = run_sender(mode, burst_length, checktype, seed,
                             &usage, &wall_ms);
+        parse_sender_errors(error_starts, error_lengths, 64);
         usleep(10000);
         log_bytes = parse_receiver_output(&log_offset, packet_out,
                                           case_id, seed, mode,
                                           burst_length, checktype,
+                                          error_starts, error_lengths,
                                           &validated, &errors,
                                           &invalid_metadata);
         user_ms = usage.ru_utime.tv_sec * 1000.0 +

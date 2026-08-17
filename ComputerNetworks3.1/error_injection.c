@@ -2,6 +2,17 @@
 #include <stdlib.h>
 #include <time.h>
 
+static int recorded_error_position = -1;
+static int recorded_error_length = 0;
+
+int last_error_position(void) {
+    return recorded_error_position;
+}
+
+int last_error_length(void) {
+    return recorded_error_length;
+}
+
 void seed_error_injection(void) {
     srand((unsigned int)time(NULL));
 }
@@ -17,6 +28,8 @@ int inject_at_position(char *packet, int packet_size, int position) {
     }
 
     packet[position] ^= 1;
+    recorded_error_position = position;
+    recorded_error_length = 1;
     return 0;
 }
 
@@ -45,6 +58,8 @@ int inject_burst(char *packet, int packet_size, int burst_length) {
     for (i = 0; i < burst_length; i++) {
         packet[start_position + i] ^= 1;
     }
+    recorded_error_position = start_position;
+    recorded_error_length = burst_length;
 
     return 0;
 }
