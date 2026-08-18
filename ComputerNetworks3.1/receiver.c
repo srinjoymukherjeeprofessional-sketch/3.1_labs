@@ -132,8 +132,13 @@ int start_server(){
             continue;
         }
 
-        // lose the pesky "Address already in use" error message
-        // setsockopt();
+        // Allow quick evaluator reruns without waiting for the port to clear.
+        if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR,
+                       &yes, sizeof yes) == -1) {
+            perror("setsockopt");
+            close(sock_fd);
+            continue;
+        }
 
         if (bind(sock_fd, p->ai_addr, p->ai_addrlen) == -1) {
             close(sock_fd);

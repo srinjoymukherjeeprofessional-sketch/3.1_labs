@@ -37,6 +37,7 @@
 #define SENDER_LOG "evaluation_sender.log"
 #define OUTPUT_CSV "evaluation_end_to_end.csv"
 #define PACKET_OUTPUT_CSV "evaluation_packets.csv"
+#define PROTECTED_BYTES 60
 
 static const char *scheme_name(int checktype)
 {
@@ -110,6 +111,7 @@ static int run_sender(int mode, int burst_length, int checktype,
     }
     if (pid == 0) {
         char seed_text[32];
+        char injection_limit_text[16];
         int sender_log_fd;
 
         close(input_pipe[1]);
@@ -123,7 +125,10 @@ static int run_sender(int mode, int burst_length, int checktype,
         dup2(sender_log_fd, STDERR_FILENO);
         close(sender_log_fd);
         snprintf(seed_text, sizeof seed_text, "%u", seed);
+        snprintf(injection_limit_text, sizeof injection_limit_text, "%d",
+                 PROTECTED_BYTES);
         setenv("ERROR_INJECTION_SEED", seed_text, 1);
+        setenv("ERROR_INJECTION_LIMIT", injection_limit_text, 1);
         setenv("EVAL_DETAIL", "1", 1);
         execl("./sender", "./sender", "127.0.0.1", (char *)NULL);
         _exit(127);
@@ -178,10 +183,13 @@ static const char *error_region(int start, int length)
 {
     int end = start < 0 ? -1 : start + length - 1;
     if (start < 0) return "none";
-    if (end < 16) return "mac_header";
+    if (end < 12) return "mac_header";
+    if (start >= 12 && end < 16) return "length_header";
     if (start >= 16 && end < 60) return "payload";
     if (start >= 60) return "integrity_field";
-    return "header_payload_boundary";
+    if (start < 12 && end >= 12 && end < 16) return "mac_header_boundary";
+    if (start < 16 && end >= 16) return "header_payload_boundary";
+    return "payload_integrity_boundary";
 }
 
 static long parse_receiver_output(off_t *offset, FILE *packet_out,
@@ -323,7 +331,7 @@ int main(void)
         parse_sender_errors(error_starts, error_lengths, 64);
         usleep(10000);
         log_bytes = parse_receiver_output(&log_offset, packet_out,
-                                          case_id, seed, mode,
+                                          case_id + 1, seed, mode,
                                           burst_length, checktype,
                                           error_starts, error_lengths,
                                           &validated, &errors,

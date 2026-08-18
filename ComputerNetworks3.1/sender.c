@@ -39,8 +39,26 @@ void *get_in_addr(struct sockaddr *sa)
 int send_file_in_packets(int sockfd, const char* filename,
                          int mode, int burst_length, int checktype) {
     FILE* file = fopen(filename, "rb");
+    const char *limit_text;
+    int injection_size = PACKET_SIZE;
     if (file == NULL) {
         perror("Failed to open file");
+        return -1;
+    }
+
+    limit_text = getenv("ERROR_INJECTION_LIMIT");
+    if (limit_text != NULL) {
+        char *end = NULL;
+        long requested_limit = strtol(limit_text, &end, 10);
+
+        if (end != limit_text && *end == '\0' &&
+            requested_limit > 0 && requested_limit <= PACKET_SIZE) {
+            injection_size = (int)requested_limit;
+        }
+    }
+    if (mode == 2 && burst_length > injection_size) {
+        fprintf(stderr, "Burst length exceeds evaluation injection limit\n");
+        fclose(file);
         return -1;
     }
 
@@ -63,9 +81,9 @@ int send_file_in_packets(int sockfd, const char* filename,
 		// The checksum is already inside payload. Inject the error only now,
 		// so the receiver can detect the change.
 		if (mode == 1) {
-			inject_random_position(payload, PACKET_SIZE);
+			inject_random_position(payload, injection_size);
 		} else if (mode == 2) {
-			inject_burst(payload, PACKET_SIZE, burst_length);
+			inject_burst(payload, injection_size, burst_length);
 		}
 		if (evaluation_detail) {
 			printf("EVAL_ERROR packet=%d start=%d length=%d\n",
