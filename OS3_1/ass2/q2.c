@@ -10,6 +10,8 @@
 
 //waitpid
 #include<sys/wait.h>
+#include <sys/stat.h>
+
 
 int main(){
     int n1, n2;
