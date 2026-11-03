@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" style="background:#FFFFFF; font-family:sans-serif;">
+<text x="400.0" y="32" text-anchor="middle" font-size="18" font-weight="bold" fill="#1A202C">Metric 2: Transmission Efficiency without Error (p = 0.0)</text>
+<line x1="70" y1="370.0" x2="760" y2="370.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="374.0" text-anchor="end" font-size="11" fill="#718096">0</text>
+<line x1="70" y1="308.0" x2="760" y2="308.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="312.0" text-anchor="end" font-size="11" fill="#718096">22</text>
+<line x1="70" y1="246.0" x2="760" y2="246.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="250.0" text-anchor="end" font-size="11" fill="#718096">44</text>
+<line x1="70" y1="184.0" x2="760" y2="184.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="188.0" text-anchor="end" font-size="11" fill="#718096">66</text>
+<line x1="70" y1="122.0" x2="760" y2="122.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="126.0" text-anchor="end" font-size="11" fill="#718096">88</text>
+<line x1="70" y1="60.0" x2="760" y2="60.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="64.0" text-anchor="end" font-size="11" fill="#718096">110</text>
+<text x="20" y="225.0" text-anchor="middle" transform="rotate(-90 20 225.0)" font-size="13" font-weight="bold" fill="#4A5568">Efficiency (%)</text>
+<rect x="90.7" y="88.18181818181819" width="86.94" height="281.8181818181818" fill="#2B6CB0" rx="2"/>
+<text x="134.17000000000002" y="83.18181818181819" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">100.0</text>
+<text x="139.0" y="395" text-anchor="middle" font-size="12" fill="#2D3748">Stop-Wait</text>
+<rect x="228.7" y="88.18181818181819" width="86.94" height="281.8181818181818" fill="#2B6CB0" rx="2"/>
+<text x="272.16999999999996" y="83.18181818181819" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">100.0</text>
+<text x="277.0" y="395" text-anchor="middle" font-size="12" fill="#2D3748">GBN (N=4)</text>
+<rect x="366.7" y="88.18181818181819" width="86.94" height="281.8181818181818" fill="#2B6CB0" rx="2"/>
+<text x="410.16999999999996" y="83.18181818181819" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">100.0</text>
+<text x="415.0" y="395" text-anchor="middle" font-size="12" fill="#2D3748">GBN (N=8)</text>
+<rect x="504.7" y="88.18181818181819" width="86.94" height="281.8181818181818" fill="#2B6CB0" rx="2"/>
+<text x="548.17" y="83.18181818181819" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">100.0</text>
+<text x="553.0" y="395" text-anchor="middle" font-size="12" fill="#2D3748">SR (N=4)</text>
+<rect x="642.7" y="88.18181818181819" width="86.94" height="281.8181818181818" fill="#2B6CB0" rx="2"/>
+<text x="686.1700000000001" y="83.18181818181819" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">100.0</text>
+<text x="691.0" y="395" text-anchor="middle" font-size="12" fill="#2D3748">SR (N=8)</text>
+<rect x="70" y="420" width="14" height="14" fill="#2B6CB0"/>
+<text x="90" y="432" font-size="11" fill="#4A5568">Transmission Efficiency (%)</text>
+</svg>

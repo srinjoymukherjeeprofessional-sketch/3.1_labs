@@ -1,0 +1,6 @@
+seq_idx,seq_num,elapsed_ms,accepted,nak_sent
+0,0,501.162,true,false
+1,1,501.422,true,false
+3,3,501.451,true,false
+5,5,1001.860,true,false
+8,8,1502.215,true,false

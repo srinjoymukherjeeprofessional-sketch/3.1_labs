@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" style="background:#FFFFFF; font-family:sans-serif;">
+<text x="400.0" y="32" text-anchor="middle" font-size="18" font-weight="bold" fill="#1A202C">Metric 1: Packet Propagation vs ACK Reception Time (RTT)</text>
+<line x1="70" y1="370.0" x2="760" y2="370.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="374.0" text-anchor="end" font-size="11" fill="#718096">0</text>
+<line x1="70" y1="308.0" x2="760" y2="308.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="312.0" text-anchor="end" font-size="11" fill="#718096">23</text>
+<line x1="70" y1="246.0" x2="760" y2="246.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="250.0" text-anchor="end" font-size="11" fill="#718096">47</text>
+<line x1="70" y1="184.0" x2="760" y2="184.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="188.0" text-anchor="end" font-size="11" fill="#718096">70</text>
+<line x1="70" y1="122.0" x2="760" y2="122.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="126.0" text-anchor="end" font-size="11" fill="#718096">93</text>
+<line x1="70" y1="60.0" x2="760" y2="60.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="64.0" text-anchor="end" font-size="11" fill="#718096">117</text>
+<text x="20" y="225.0" text-anchor="middle" transform="rotate(-90 20 225.0)" font-size="13" font-weight="bold" fill="#4A5568">Round-Trip Time (ms)</text>
+<rect x="84.78571428571428" y="369.81428324458295" width="20.7" height="0.185716755417024" fill="#2B6CB0" rx="2"/>
+<text x="95.13571428571427" y="364.81428324458295" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">0.1</text>
+<rect x="107.78571428571428" y="369.6020355241064" width="20.7" height="0.3979644758936228" fill="#C53030" rx="2"/>
+<text x="118.13571428571427" y="364.6020355241064" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">0.1</text>
+<rect x="130.78571428571428" y="365.5560633525212" width="20.7" height="4.443936647478789" fill="#2F855A" rx="2"/>
+<text x="141.13571428571427" y="360.5560633525212" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">1.7</text>
+<text x="119.28571428571428" y="395" text-anchor="middle" font-size="12" fill="#2D3748">SW Clean</text>
+<rect x="183.35714285714283" y="369.4773399883264" width="20.7" height="0.5226600116736247" fill="#2B6CB0" rx="2"/>
+<text x="193.70714285714283" y="364.4773399883264" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">0.2</text>
+<rect x="206.35714285714283" y="314.8023271935545" width="20.7" height="55.19767280644549" fill="#C53030" rx="2"/>
+<text x="216.70714285714283" y="309.8023271935545" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">20.8</text>
+<rect x="229.35714285714283" y="259.13240320904856" width="20.7" height="110.86759679095141" fill="#2F855A" rx="2"/>
+<text x="239.70714285714283" y="254.13240320904856" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">41.8</text>
+<text x="217.85714285714283" y="395" text-anchor="middle" font-size="12" fill="#2D3748">SW 20ms</text>
+<rect x="281.9285714285714" y="369.9893876139762" width="20.7" height="0.010612386023829943" fill="#2B6CB0" rx="2"/>
+<text x="292.2785714285714" y="364.9893876139762" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">0.0</text>
+<rect x="304.9285714285714" y="235.8673999483074" width="20.7" height="134.1326000516926" fill="#C53030" rx="2"/>
+<text x="315.2785714285714" y="230.8673999483074" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">50.6</text>
+<rect x="327.9285714285714" y="100.43478260869563" width="20.7" height="269.5652173913044" fill="#2F855A" rx="2"/>
+<text x="338.2785714285714" y="95.43478260869563" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">101.6</text>
+<text x="316.4285714285714" y="395" text-anchor="middle" font-size="12" fill="#2D3748">SW 50ms</text>
+<rect x="380.5" y="369.52774882193955" width="20.7" height="0.47225117806043243" fill="#2B6CB0" rx="2"/>
+<text x="390.85" y="364.52774882193955" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">0.2</text>
+<rect x="403.5" y="369.48529927784426" width="20.7" height="0.5147007221557522" fill="#C53030" rx="2"/>
+<text x="413.85" y="364.48529927784426" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">0.2</text>
+<rect x="426.5" y="369.1616215041174" width="20.7" height="0.8383784958825654" fill="#2F855A" rx="2"/>
+<text x="436.85" y="364.1616215041174" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">0.3</text>
+<text x="415.0" y="395" text-anchor="middle" font-size="12" fill="#2D3748">GBN Clean</text>
+<rect x="479.07142857142856" y="315.38600842486517" width="20.7" height="54.61399157513485" fill="#2B6CB0" rx="2"/>
+<text x="489.4214285714286" y="310.38600842486517" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">20.6</text>
+<rect x="502.07142857142856" y="207.2245700699904" width="20.7" height="162.7754299300096" fill="#C53030" rx="2"/>
+<text x="512.4214285714286" y="202.2245700699904" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">61.4</text>
+<rect x="525.0714285714286" y="146.81356262933843" width="20.7" height="223.18643737066157" fill="#2F855A" rx="2"/>
+<text x="535.4214285714286" y="141.81356262933843" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">84.1</text>
+<text x="513.5714285714286" y="395" text-anchor="middle" font-size="12" fill="#2D3748">GBN 20ms</text>
+<rect x="577.6428571428572" y="369.38448161061785" width="20.7" height="0.6155183893821367" fill="#2B6CB0" rx="2"/>
+<text x="587.9928571428572" y="364.38448161061785" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">0.2</text>
+<rect x="600.6428571428572" y="369.1616215041174" width="20.7" height="0.8383784958825654" fill="#C53030" rx="2"/>
+<text x="610.9928571428572" y="364.1616215041174" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">0.3</text>
+<rect x="623.6428571428572" y="367.89344137426974" width="20.7" height="2.1065586257302438" fill="#2F855A" rx="2"/>
+<text x="633.9928571428572" y="362.89344137426974" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">0.8</text>
+<text x="612.1428571428572" y="395" text-anchor="middle" font-size="12" fill="#2D3748">SR Clean</text>
+<rect x="676.2142857142858" y="369.9628566489166" width="20.7" height="0.0371433510834048" fill="#2B6CB0" rx="2"/>
+<text x="686.5642857142858" y="364.9628566489166" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">0.0</text>
+<rect x="699.2142857142858" y="259.2146492007333" width="20.7" height="110.78535079926674" fill="#C53030" rx="2"/>
+<text x="709.5642857142858" y="254.21464920073328" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">41.8</text>
+<rect x="722.2142857142858" y="148.90154957952697" width="20.7" height="221.09845042047303" fill="#2F855A" rx="2"/>
+<text x="732.5642857142858" y="143.90154957952697" text-anchor="middle" font-size="10" fill="#2D3748" font-weight="bold">83.3</text>
+<text x="710.7142857142858" y="395" text-anchor="middle" font-size="12" fill="#2D3748">SR 20ms</text>
+<rect x="70" y="420" width="14" height="14" fill="#2B6CB0"/>
+<text x="90" y="432" font-size="11" fill="#4A5568">Min RTT (ms)</text>
+<rect x="211" y="420" width="14" height="14" fill="#C53030"/>
+<text x="231" y="432" font-size="11" fill="#4A5568">Median RTT (ms)</text>
+<rect x="376" y="420" width="14" height="14" fill="#2F855A"/>
+<text x="396" y="432" font-size="11" fill="#4A5568">Max RTT (ms)</text>
+</svg>

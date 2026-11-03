@@ -7,8 +7,8 @@ fi
 
 BIN="my-deleted-files"
 if ([ "$1" == "-cl" ]); then
-    rm -r "$BIN"
-    echo "Deleted '$BIN' directory and its contents."
+    rm -r "$BIN"/*
+    echo "Deleted '$BIN' contents."
     exit 0
 fi
 

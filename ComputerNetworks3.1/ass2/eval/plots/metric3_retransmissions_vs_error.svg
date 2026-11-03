@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="460" style="background:#FFFFFF; font-family:sans-serif;">
+<text x="410.0" y="32" text-anchor="middle" font-size="18" font-weight="bold" fill="#1A202C">Retransmissions vs Error Probability</text>
+<line x1="70" y1="380.0" x2="770" y2="380.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="384.0" text-anchor="end" font-size="11" fill="#718096">0%</text>
+<line x1="70" y1="316.0" x2="770" y2="316.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="320.0" text-anchor="end" font-size="11" fill="#718096">73%</text>
+<line x1="70" y1="252.0" x2="770" y2="252.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="256.0" text-anchor="end" font-size="11" fill="#718096">146%</text>
+<line x1="70" y1="188.0" x2="770" y2="188.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="192.0" text-anchor="end" font-size="11" fill="#718096">219%</text>
+<line x1="70" y1="124.0" x2="770" y2="124.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="128.0" text-anchor="end" font-size="11" fill="#718096">292%</text>
+<line x1="70" y1="60.0" x2="770" y2="60.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="64.0" text-anchor="end" font-size="11" fill="#718096">365%</text>
+<line x1="70.0" y1="60" x2="70.0" y2="380" stroke="#EDF2F7" stroke-width="1"/>
+<text x="70.0" y="400" text-anchor="middle" font-size="11" fill="#4A5568">0.1</text>
+<line x1="245.0" y1="60" x2="245.0" y2="380" stroke="#EDF2F7" stroke-width="1"/>
+<text x="245.0" y="400" text-anchor="middle" font-size="11" fill="#4A5568">0.2</text>
+<line x1="419.99999999999994" y1="60" x2="419.99999999999994" y2="380" stroke="#EDF2F7" stroke-width="1"/>
+<text x="419.99999999999994" y="400" text-anchor="middle" font-size="11" fill="#4A5568">0.3</text>
+<line x1="595.0000000000001" y1="60" x2="595.0000000000001" y2="380" stroke="#EDF2F7" stroke-width="1"/>
+<text x="595.0000000000001" y="400" text-anchor="middle" font-size="11" fill="#4A5568">0.4</text>
+<line x1="770.0" y1="60" x2="770.0" y2="380" stroke="#EDF2F7" stroke-width="1"/>
+<text x="770.0" y="400" text-anchor="middle" font-size="11" fill="#4A5568">0.5</text>
+<text x="420.0" y="425" text-anchor="middle" font-size="13" font-weight="bold" fill="#4A5568">Error Probability (p)</text>
+<text x="20" y="230.0" text-anchor="middle" transform="rotate(-90 20 230.0)" font-size="13" font-weight="bold" fill="#4A5568">Retransmitted Frames Count</text>
+<polyline fill="none" stroke="#3182CE" stroke-width="2.5"  points="70.0,371.2 245.0,354.5 420.0,350.2 595.0,315.9 770.0,316.8"/>
+<circle cx="70.0" cy="371.2" r="4" fill="#3182CE"/>
+<circle cx="245.0" cy="354.5" r="4" fill="#3182CE"/>
+<circle cx="420.0" cy="350.2" r="4" fill="#3182CE"/>
+<circle cx="595.0" cy="315.9" r="4" fill="#3182CE"/>
+<circle cx="770.0" cy="316.8" r="4" fill="#3182CE"/>
+<polyline fill="none" stroke="#E53E3E" stroke-width="2.5"  points="70.0,373.0 245.0,319.4 420.0,294.9 595.0,294.0 770.0,269.4"/>
+<circle cx="70.0" cy="373.0" r="4" fill="#E53E3E"/>
+<circle cx="245.0" cy="319.4" r="4" fill="#E53E3E"/>
+<circle cx="420.0" cy="294.9" r="4" fill="#E53E3E"/>
+<circle cx="595.0" cy="294.0" r="4" fill="#E53E3E"/>
+<circle cx="770.0" cy="269.4" r="4" fill="#E53E3E"/>
+<polyline fill="none" stroke="#38A169" stroke-width="2.5"  points="70.0,337.9 245.0,323.8 420.0,264.1 595.0,101.7 770.0,129.8"/>
+<circle cx="70.0" cy="337.9" r="4" fill="#38A169"/>
+<circle cx="245.0" cy="323.8" r="4" fill="#38A169"/>
+<circle cx="420.0" cy="264.1" r="4" fill="#38A169"/>
+<circle cx="595.0" cy="101.7" r="4" fill="#38A169"/>
+<circle cx="770.0" cy="129.8" r="4" fill="#38A169"/>
+<polyline fill="none" stroke="#D69E2E" stroke-width="2.5"  points="70.0,369.5 245.0,358.1 420.0,339.6 595.0,301.9 770.0,266.8"/>
+<circle cx="70.0" cy="369.5" r="4" fill="#D69E2E"/>
+<circle cx="245.0" cy="358.1" r="4" fill="#D69E2E"/>
+<circle cx="420.0" cy="339.6" r="4" fill="#D69E2E"/>
+<circle cx="595.0" cy="301.9" r="4" fill="#D69E2E"/>
+<circle cx="770.0" cy="266.8" r="4" fill="#D69E2E"/>
+<circle cx="78" cy="441" r="4" fill="#3182CE"/>
+<text x="92" y="445" font-size="11" fill="#4A5568">Stop-and-Wait</text>
+<circle cx="210.5" cy="441" r="4" fill="#E53E3E"/>
+<text x="224.5" y="445" font-size="11" fill="#4A5568">GBN (W=4)</text>
+<circle cx="313.0" cy="441" r="4" fill="#38A169"/>
+<text x="327.0" y="445" font-size="11" fill="#4A5568">GBN (W=8)</text>
+<circle cx="415.5" cy="441" r="4" fill="#D69E2E"/>
+<text x="429.5" y="445" font-size="11" fill="#4A5568">Selective Repeat (NAK)</text>
+</svg>

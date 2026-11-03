@@ -1,0 +1,42 @@
+The quick brown fox jumps over the lazy dog. In computer networking, the Data Link Layer is the
+second layer of the OSI model. It is responsible for node-to-node data transfer between two directly
+connected nodes. It detects and possibly corrects errors that may occur in the physical layer. It
+defines the protocol to establish and terminate a connection between two physically connected devices,
+and provides flow control to manage the rate of data transmission.
+
+The frame is the fundamental unit of data at the Data Link Layer. Each frame contains a header with
+source and destination MAC addresses, a payload carrying the actual data, and a trailer with a Frame
+Check Sequence (FCS) used for error detection. The FCS is computed using either a Cyclic Redundancy
+Check (CRC) or the Internet Checksum algorithm.
+
+Error detection at the Data Link Layer is crucial because physical channels are inherently noisy.
+Electromagnetic interference, signal attenuation, and hardware imperfections can flip bits during
+transmission. The receiver recomputes the FCS on the received frame and compares it with the FCS in
+the trailer. A mismatch indicates corruption and the frame is discarded.
+
+Flow control ensures that a fast sender does not overwhelm a slow receiver. Three classic protocols
+are studied in this assignment: Stop-and-Wait ARQ, Go-Back-N ARQ, and Selective Repeat ARQ.
+
+In Stop-and-Wait, the sender transmits one frame and pauses until an acknowledgement arrives. This is
+simple but inefficient because the channel is idle during the propagation delay. The efficiency is
+proportional to 1/(1 + 2a) where a is the ratio of propagation delay to transmission time.
+
+Go-Back-N improves efficiency by allowing the sender to have up to N frames outstanding at once. The
+receiver accepts only in-order frames and discards everything else, requiring the sender to retransmit
+the entire window on any loss. This is simple on the receiver side but wasteful when errors are common.
+
+Selective Repeat is more efficient under high error rates because the receiver can buffer out-of-order
+frames and the sender retransmits only the specific lost frame. The tradeoff is a more complex receiver
+implementation that requires a buffer of size N and careful window management.
+
+Adaptive timeouts improve performance by tracking measured round-trip times. The Jacobson-Karels
+algorithm uses exponential weighted moving averages of RTT and RTT variance to compute a retransmit
+timeout that tracks changing network conditions. Exponential backoff on consecutive timeouts prevents
+a sender from flooding a congested network.
+
+The NAK (Negative Acknowledgement) optimization in Selective Repeat allows the receiver to immediately
+signal the sender when it detects a gap or corruption, reducing the wait for the sender timeout and
+cutting retransmission latency significantly under high error rates.
+
+This assignment implements all of these mechanisms over real TCP sockets with a simulated unreliable
+channel layer injecting loss, delay, and corruption before each TCP write operation.

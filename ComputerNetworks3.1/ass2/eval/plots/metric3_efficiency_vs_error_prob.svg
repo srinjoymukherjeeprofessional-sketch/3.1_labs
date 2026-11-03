@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="460" style="background:#FFFFFF; font-family:sans-serif;">
+<text x="410.0" y="32" text-anchor="middle" font-size="18" font-weight="bold" fill="#1A202C">Metric 3: Transmission Efficiency vs Error Probability (Observed vs Theoretical)</text>
+<line x1="70" y1="380.0" x2="770" y2="380.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="384.0" text-anchor="end" font-size="11" fill="#718096">0%</text>
+<line x1="70" y1="316.0" x2="770" y2="316.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="320.0" text-anchor="end" font-size="11" fill="#718096">20%</text>
+<line x1="70" y1="252.0" x2="770" y2="252.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="256.0" text-anchor="end" font-size="11" fill="#718096">40%</text>
+<line x1="70" y1="188.0" x2="770" y2="188.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="192.0" text-anchor="end" font-size="11" fill="#718096">60%</text>
+<line x1="70" y1="124.0" x2="770" y2="124.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="128.0" text-anchor="end" font-size="11" fill="#718096">80%</text>
+<line x1="70" y1="60.0" x2="770" y2="60.0" stroke="#E2E8F0" stroke-width="1"/>
+<text x="60" y="64.0" text-anchor="end" font-size="11" fill="#718096">100%</text>
+<line x1="70.0" y1="60" x2="70.0" y2="380" stroke="#EDF2F7" stroke-width="1"/>
+<text x="70.0" y="400" text-anchor="middle" font-size="11" fill="#4A5568">0.1</text>
+<line x1="245.0" y1="60" x2="245.0" y2="380" stroke="#EDF2F7" stroke-width="1"/>
+<text x="245.0" y="400" text-anchor="middle" font-size="11" fill="#4A5568">0.2</text>
+<line x1="419.99999999999994" y1="60" x2="419.99999999999994" y2="380" stroke="#EDF2F7" stroke-width="1"/>
+<text x="419.99999999999994" y="400" text-anchor="middle" font-size="11" fill="#4A5568">0.3</text>
+<line x1="595.0000000000001" y1="60" x2="595.0000000000001" y2="380" stroke="#EDF2F7" stroke-width="1"/>
+<text x="595.0000000000001" y="400" text-anchor="middle" font-size="11" fill="#4A5568">0.4</text>
+<line x1="770.0" y1="60" x2="770.0" y2="380" stroke="#EDF2F7" stroke-width="1"/>
+<text x="770.0" y="400" text-anchor="middle" font-size="11" fill="#4A5568">0.5</text>
+<text x="420.0" y="425" text-anchor="middle" font-size="13" font-weight="bold" fill="#4A5568">Error Probability (p)</text>
+<text x="20" y="230.0" text-anchor="middle" transform="rotate(-90 20 230.0)" font-size="13" font-weight="bold" fill="#4A5568">Transmission Efficiency (%)</text>
+<polyline fill="none" stroke="#3182CE" stroke-width="2.5"  points="70.0,124.0 245.0,169.4 420.0,216.5 595.0,268.0 770.0,293.3"/>
+<circle cx="70.0" cy="124.0" r="4" fill="#3182CE"/>
+<circle cx="245.0" cy="169.4" r="4" fill="#3182CE"/>
+<circle cx="420.0" cy="216.5" r="4" fill="#3182CE"/>
+<circle cx="595.0" cy="268.0" r="4" fill="#3182CE"/>
+<circle cx="770.0" cy="293.3" r="4" fill="#3182CE"/>
+<polyline fill="none" stroke="#E53E3E" stroke-width="2.5" stroke-dasharray="6,4" points="70.0,91.3 245.0,121.3 420.0,150.0 595.0,177.2 770.0,203.2"/>
+<polyline fill="none" stroke="#38A169" stroke-width="2.5"  points="70.0,115.0 245.0,180.6 420.0,192.8 595.0,253.0 770.0,252.0"/>
+<circle cx="70.0" cy="115.0" r="4" fill="#38A169"/>
+<circle cx="245.0" cy="180.6" r="4" fill="#38A169"/>
+<circle cx="420.0" cy="192.8" r="4" fill="#38A169"/>
+<circle cx="595.0" cy="253.0" r="4" fill="#38A169"/>
+<circle cx="770.0" cy="252.0" r="4" fill="#38A169"/>
+<polyline fill="none" stroke="#D69E2E" stroke-width="2.5" stroke-dasharray="6,4" points="70.0,91.3 245.0,121.3 420.0,150.0 595.0,177.2 770.0,203.2"/>
+<polyline fill="none" stroke="#805AD5" stroke-width="2.5"  points="70.0,105.8 245.0,248.8 420.0,274.1 595.0,274.7 770.0,291.7"/>
+<circle cx="70.0" cy="105.8" r="4" fill="#805AD5"/>
+<circle cx="245.0" cy="248.8" r="4" fill="#805AD5"/>
+<circle cx="420.0" cy="274.1" r="4" fill="#805AD5"/>
+<circle cx="595.0" cy="274.7" r="4" fill="#805AD5"/>
+<circle cx="770.0" cy="291.7" r="4" fill="#805AD5"/>
+<polyline fill="none" stroke="#4A5568" stroke-width="2.5" stroke-dasharray="6,4" points="70.0,156.9 245.0,215.7 420.0,255.2 595.0,283.4 770.0,304.5"/>
+<circle cx="78" cy="441" r="4" fill="#3182CE"/>
+<text x="92" y="445" font-size="11" fill="#4A5568">SR (Observed)</text>
+<line x1="202.5" y1="441" x2="218.5" y2="441" stroke="#E53E3E" stroke-width="2.5" stroke-dasharray="4,3"/>
+<text x="224.5" y="445" font-size="11" fill="#4A5568">SR (Theoretical)</text>
+<circle cx="365.5" cy="441" r="4" fill="#38A169"/>
+<text x="379.5" y="445" font-size="11" fill="#4A5568">Stop-Wait (Observed)</text>
+<line x1="542.5" y1="441" x2="558.5" y2="441" stroke="#D69E2E" stroke-width="2.5" stroke-dasharray="4,3"/>
+<text x="564.5" y="445" font-size="11" fill="#4A5568">Stop-Wait (Theoretical)</text>
+<circle cx="758.0" cy="441" r="4" fill="#805AD5"/>
+<text x="772.0" y="445" font-size="11" fill="#4A5568">GBN W=4 (Observed)</text>
+<line x1="920.0" y1="441" x2="936.0" y2="441" stroke="#4A5568" stroke-width="2.5" stroke-dasharray="4,3"/>
+<text x="942.0" y="445" font-size="11" fill="#4A5568">GBN W=4 (Theoretical)</text>
+</svg>
