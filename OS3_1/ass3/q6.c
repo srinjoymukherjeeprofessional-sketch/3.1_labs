@@ -2,10 +2,7 @@
 
 int main()
 {
-    int n, i, index, blocks[50];
-
-    printf("Enter the index block number: ");
-    scanf("%d", &index);
+    int n, i, blocks[50];
 
     printf("Enter the number of blocks required: ");
     scanf("%d", &n);
@@ -16,14 +13,15 @@ int main()
         scanf("%d", &blocks[i]);
     }
 
-    printf("\nIndexed File Allocation\n");
+    printf("\nLinked File Allocation\n");
     printf("----------------------\n");
-    printf("Index Block: %d\n", index);
-    printf("File Block\tAllocated Block\n");
 
     for (i = 0; i < n; i++)
     {
-        printf("%d\t\t%d\n", i + 1, blocks[i]);
+        if (i < n - 1)
+            printf("%d -> ", blocks[i]);
+        else
+            printf("%d -> NULL\n", blocks[i]);
     }
 
     printf("\nFile allocation completed successfully.\n");
