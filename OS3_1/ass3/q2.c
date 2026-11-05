@@ -1,16 +1,14 @@
-
 #include <stdio.h>
+#include<stdlib.h>
 
 int pages[] = {
     9, 10, 11, 7, 12, 8, 7, 6, 12, 5,
     4, 3, 10, 11, 12, 4, 5, 6, 9, 4, 5
 };
 
-int n = sizeof(pages) / sizeof(pages[0]);
+int n= sizeof(pages)/sizeof(pages[0]);
 
-// METHOD 1: Timestamp method
-
-void lruTimestamp(int capacity) {
+void lruTimestamp(int capacity, int pages[], int n) {
     int frames[capacity];
     int lastUsed[capacity];
 
@@ -93,9 +91,7 @@ void lruTimestamp(int capacity) {
 }
 
 
-// METHOD 2: Recency ordering method
-
-void lruOrdering(int capacity) {
+void lruOrdering(int capacity, int pages[], int n) {
     int frames[capacity];
 
     int count = 0;
@@ -169,13 +165,36 @@ void lruOrdering(int capacity) {
 int main() {
     printf("LRU PAGE REPLACEMENT SIMULATION\n");
 
-    // Method 1: Timestamp
-    lruTimestamp(5);
-    lruTimestamp(6);
+    // GLOBAL PAGE REFERENCE STRING
+    // // Method 1: Timestamp
+    // lruTimestamp(5);
+    // lruTimestamp(6);
 
-    // Method 2: Recency ordering
-    lruOrdering(5);
-    lruOrdering(6);
+    // // Method 2: Recency ordering
+    // lruOrdering(5);
+    // lruOrdering(6);
 
+
+    // INPUT PAGE REFERENCE STRING
+    int* inputPages;
+    int n;
+    printf("Enter number of pages in reference string: ");
+    scanf("%d", &n);
+    inputPages = malloc(n*sizeof(int));
+    printf("Enter %d page numbers ", n);
+    for(int i=0;i<n;i++){
+        scanf("%d", inputPages+i);
+    }
+
+    printf("Enter 0 for timestamp based lru, 1 for recency ordering lru: ");
+    int input;
+    scanf("%d", &input);
+    if (input==0){
+        lruTimestamp(5, inputPages, n);
+        lruTimestamp(6, inputPages, n);
+    }else{
+        lruOrdering(5, inputPages, n);
+        lruOrdering(6, inputPages, n);
+    }
     return 0;
 }
