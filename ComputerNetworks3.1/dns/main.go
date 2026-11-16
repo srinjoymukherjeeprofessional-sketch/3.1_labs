@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -104,108 +103,50 @@ func loadRecords(path string) (map[string]addressRecords, error) {
 	return loaded, nil
 }
 
-func handleQuery(query []byte) ([]byte, error) {
-	const headerSize = 12
-
-	if len(query) < headerSize {
-		return nil, fmt.Errorf("packet shorter than DNS header")
-	}
-
-	flags := binary.BigEndian.Uint16(query[2:4])
-	questions := binary.BigEndian.Uint16(query[4:6])
-
-	// Handle only standard queries with exactly one question.
-	if flags&0x8000 != 0 || flags&0x7800 != 0 || questions != 1 {
-		return nil, fmt.Errorf("unsupported query")
-	}
-
-	name, offset, err := readName(query, headerSize)
+func handleQuery(packet []byte) ([]byte, error) {
+	request, err := ParseMessage(packet)
 	if err != nil {
 		return nil, err
 	}
-	if offset+4 > len(query) {
-		return nil, fmt.Errorf("incomplete question")
+	if request.Header.Flags.QR || request.Header.Flags.Opcode != 0 || len(request.Questions) != 1 {
+		return nil, fmt.Errorf("unsupported query")
 	}
 
-	qtype := binary.BigEndian.Uint16(query[offset : offset+2])
-	qclass := binary.BigEndian.Uint16(query[offset+2 : offset+4])
-	questionEnd := offset + 4
+	question := request.Questions[0]
+	//initialize the response
+	response := Message{
+		Header: Header{
+			ID: request.Header.ID,
+			Flags: Flags{
+				QR: true,
+				AA: true,
+				RD: request.Header.Flags.RD,
+			},
+		},
+		Questions: request.Questions,
+	}
 
-	// Start a new response with the original header and question.
-	response := make([]byte, questionEnd)
-	copy(response, query[:questionEnd])
-
-	// QR = response, AA = authoritative; preserve the request's RD bit.
-	responseFlags := uint16(0x8400) | (flags & 0x0100)
-	addresses, exists := records[strings.ToLower(name)]
-
+	addresses, exists := records[strings.ToLower(question.Name)]
 	if !exists {
-		responseFlags |= 3 // RCODE = NXDOMAIN
+		response.Header.Flags.RCode = 3 // NXDOMAIN
 	}
-
-	binary.BigEndian.PutUint16(response[2:4], responseFlags)
-	binary.BigEndian.PutUint16(response[4:6], 1) // QDCOUNT
-	binary.BigEndian.PutUint16(response[6:8], 0) // ANCOUNT
-	binary.BigEndian.PutUint16(response[8:10], 0)
-	binary.BigEndian.PutUint16(response[10:12], 0)
 
 	var ip net.IP
-	if qclass == 1 { // IN
-		switch qtype {
-		case 1: // A: 4 bytes
+	if question.Class == 1 { // IN
+		switch question.Type {
+		case 1: // A
 			ip = addresses.A
-		case 28: // AAAA: 16 bytes
+		case 28: // AAAA
 			ip = addresses.AAAA
 		}
 	}
-
-	// An existing name without the requested type gets an empty answer.
 	if ip != nil {
-		binary.BigEndian.PutUint16(response[6:8], 1)
-
-		// NAME points back to the question name at offset 12.
-		response = append(response,
-			0xc0, 0x0c, // compressed NAME
-			byte(qtype>>8), byte(qtype), // TYPE: A or AAAA
-			0x00, 0x01, // CLASS: IN
-			0x00, 0x00, 0x00, 0x3c, // TTL: 60 seconds
-			0x00, byte(len(ip)), // RDLENGTH: 4 or 16 bytes
-		)
-		response = append(response, ip...)
+		response.Answers = []ResourceRecord{{
+			Name: question.Name, Type: question.Type, Class: 1,
+			TTL: 60, Data: []byte(ip),
+		}}
 	}
 
-	log.Printf("query: %s type=%d class=%d", name, qtype, qclass)
-	return response, nil
-}
-
-// readName decodes an uncompressed DNS name from the question.
-func readName(packet []byte, offset int) (string, int, error) {
-	var labels []string
-	start := offset
-
-	for {
-		if offset >= len(packet) {
-			return "", 0, fmt.Errorf("incomplete name")
-		}
-
-		length := int(packet[offset])
-		offset++
-
-		if length == 0 {
-			if offset-start > 255 {
-				return "", 0, fmt.Errorf("name too long")
-			}
-			if len(labels) == 0 {
-				return ".", offset, nil
-			}
-			return strings.Join(labels, ".") + ".", offset, nil
-		}
-
-		if length > 63 || offset+length > len(packet) {
-			return "", 0, fmt.Errorf("invalid label")
-		}
-
-		labels = append(labels, string(packet[offset:offset+length]))
-		offset += length
-	}
+	log.Printf("query: %s type=%d class=%d", question.Name, question.Type, question.Class)
+	return response.Marshal()
 }
