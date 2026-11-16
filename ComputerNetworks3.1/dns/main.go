@@ -2,11 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"strings"
+	"time"
 )
 
 // This server is authoritative for these names.
@@ -16,42 +18,50 @@ type addressRecords struct {
 	PTR  string
 }
 
-var records map[string]addressRecords
-
 func main() {
-	var err error
-	records, err = loadRecords("records.json")
+	isMain := flag.Bool("main", false, "enable the client-facing cache; upstream must be loopback")
+	port := flag.Int("port", 5353, "UDP port on 127.0.0.1")
+	path := flag.String("records", "records.json", "records JSON file")
+	upstream := flag.String("upstream", "", "upstream IP:port (default: next loopback port)")
+	delay := flag.Duration("delay", time.Second, "delay before each upstream query")
+	timeout := flag.Duration("timeout", 10*time.Second, "upstream response timeout, excluding artificial delay")
+	flag.Parse()
+	if *port < 1 || *port > 65535 || *delay < 0 || *timeout <= 0 {
+		log.Fatal("invalid port, delay, or timeout")
+	}
+	if *upstream == "" {
+		if *port == 65535 {
+			log.Fatal("specify -upstream when using port 65535")
+		}
+		*upstream = fmt.Sprintf("127.0.0.1:%d", *port+1)
+	}
+	upstreamAddr, err := net.ResolveUDPAddr("udp", *upstream)
+	if err != nil || upstreamAddr.IP == nil || upstreamAddr.Port < 1 || upstreamAddr.Port > 65535 {
+		log.Fatal("upstream must be a valid IP:port")
+	}
+	if *isMain && !upstreamAddr.IP.IsLoopback() {
+		log.Fatal("-main requires a loopback upstream; it cannot query public resolvers directly")
+	}
+	if upstreamAddr.IP.IsLoopback() && upstreamAddr.Port == *port {
+		log.Fatal("upstream cannot be this server")
+	}
+	loaded, err := loadRecords(*path)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	addr := &net.UDPAddr{IP: net.ParseIP("127.0.0.1"), Port: 5353}
-
+	server := &Server{records: loaded, upstream: upstreamAddr.String(), delay: *delay, timeout: *timeout}
+	if *isMain {
+		server.cache = make(map[string]cacheEntry)
+	}
+	addr := &net.UDPAddr{IP: net.ParseIP("127.0.0.1"), Port: *port}
 	conn, err := net.ListenUDP("udp", addr)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-
-	log.Printf("DNS server listening on %s", addr)
-
-	buf := make([]byte, 4096)
-	for {
-		n, client, err := conn.ReadFromUDP(buf)
-		if err != nil {
-			log.Printf("read: %v", err)
-			continue
-		}
-
-		response, err := handleQuery(buf[:n])
-		if err != nil {
-			log.Printf("invalid query from %s: %v", client, err)
-			continue
-		}
-
-		if _, err := conn.WriteToUDP(response, client); err != nil {
-			log.Printf("write to %s: %v", client, err)
-		}
+	log.Printf("DNS listening=%s records=%s upstream=%s delay=%s cache=%t", addr, *path, server.upstream, server.delay, *isMain)
+	if err := server.serve(conn); err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -113,17 +123,10 @@ func loadRecords(path string) (map[string]addressRecords, error) {
 	return loaded, nil
 }
 
-func handleQuery(packet []byte) ([]byte, error) {
-	request, err := ParseMessage(packet)
-	if err != nil {
-		return nil, err
-	}
-	if request.Header.Flags.QR || request.Header.Flags.Opcode != 0 || len(request.Questions) != 1 {
-		return nil, fmt.Errorf("unsupported query")
-	}
-
+func localAnswer(request *Message, localRecords map[string]addressRecords, recursion bool) ([]byte, error) {
 	question := request.Questions[0]
-	//initialize the response
+	var err error
+	// Initialize the response
 	response := Message{
 		Header: Header{
 			ID: request.Header.ID,
@@ -131,12 +134,13 @@ func handleQuery(packet []byte) ([]byte, error) {
 				QR: true,
 				AA: true,
 				RD: request.Header.Flags.RD,
+				RA: recursion,
 			},
 		},
 		Questions: request.Questions,
 	}
 
-	addresses, exists := records[strings.ToLower(question.Name)]
+	addresses, exists := localRecords[strings.ToLower(question.Name)]
 	if !exists {
 		response.Header.Flags.RCode = 3 // NXDOMAIN
 	}

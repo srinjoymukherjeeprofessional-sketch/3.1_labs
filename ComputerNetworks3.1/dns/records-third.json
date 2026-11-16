@@ -1,0 +1,9 @@
+{
+  "third.test": {
+    "A": "192.0.2.30",
+    "AAAA": "2001:db8::30"
+  },
+  "30.2.0.192.in-addr.arpa": {
+    "PTR": "third.test."
+  }
+}

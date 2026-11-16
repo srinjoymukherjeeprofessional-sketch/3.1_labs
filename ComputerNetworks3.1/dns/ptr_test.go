@@ -12,9 +12,7 @@ func TestPTRAnswers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	previous := records
-	records = loaded
-	t.Cleanup(func() { records = previous })
+	server := &Server{records: loaded}
 	for _, tc := range []struct {
 		name   string
 		target string
@@ -23,7 +21,7 @@ func TestPTRAnswers(t *testing.T) {
 		{"1.0.0.127.in-addr.arpa.", "example.test.", 0},
 		{"10.2.0.192.IN-ADDR.ARPA.", "api.example.test.", 0},
 		{"example.test.", "", 0}, // Existing name without a PTR record.
-		{"2.0.0.127.in-addr.arpa.", "", 3},
+		{"2.0.0.127.in-addr.arpa.", "", 5},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			question := Question{Name: tc.name, Type: 12, Class: 1}
@@ -35,7 +33,7 @@ func TestPTRAnswers(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			packet, err = handleQuery(packet)
+			packet, err = server.handleQuery(packet)
 			if err != nil {
 				t.Fatal(err)
 			}

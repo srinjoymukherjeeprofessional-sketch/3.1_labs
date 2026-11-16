@@ -107,7 +107,8 @@ func TestHandleQueryPreservesRD(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		response, err := handleQuery(packet)
+		server := &Server{records: map[string]addressRecords{"missing.test.": {}}}
+		response, err := server.handleQuery(packet)
 		if err != nil {
 			t.Fatal(err)
 		}

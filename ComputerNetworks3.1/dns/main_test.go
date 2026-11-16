@@ -15,9 +15,7 @@ func TestAddressAnswers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	previous := records
-	records = loaded
-	t.Cleanup(func() { records = previous })
+	server := &Server{records: loaded}
 
 	for _, tc := range []struct {
 		name  string
@@ -28,7 +26,7 @@ func TestAddressAnswers(t *testing.T) {
 		{"example", 1, "127.0.0.1", 0},
 		{"example", 28, "::1", 0},
 		{"example", 15, "", 0},
-		{"missing", 28, "", 3},
+		{"missing", 28, "", 5},
 	} {
 		t.Run(tc.name+"/"+strconv.Itoa(int(tc.qtype)), func(t *testing.T) {
 			query := make([]byte, 12)
@@ -37,7 +35,7 @@ func TestAddressAnswers(t *testing.T) {
 			query = append(query, byte(len(tc.name)))
 			query = append(query, tc.name...)
 			query = append(query, 4, 't', 'e', 's', 't', 0, byte(tc.qtype>>8), byte(tc.qtype), 0, 1)
-			response, err := handleQuery(query)
+			response, err := server.handleQuery(query)
 			if err != nil {
 				t.Fatal(err)
 			}
