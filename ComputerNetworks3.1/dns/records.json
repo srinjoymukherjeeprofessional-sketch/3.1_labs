@@ -3,6 +3,12 @@
     "A": "127.0.0.1",
     "AAAA": "::1"
   },
+  "1.0.0.127.in-addr.arpa": {
+    "PTR": "example.test."
+  },
+  "10.2.0.192.in-addr.arpa": {
+    "PTR": "api.example.test."
+  },
   "api.example.test": {
     "A": "192.0.2.10",
     "AAAA": "2001:db8::10"

@@ -13,6 +13,7 @@ import (
 type addressRecords struct {
 	A    net.IP
 	AAAA net.IP
+	PTR  string
 }
 
 var records map[string]addressRecords
@@ -54,7 +55,7 @@ func main() {
 	}
 }
 
-// loadRecords reads each domain's A and AAAA records once at startup.
+// loadRecords reads each domain's A, AAAA, and PTR records once at startup.
 func loadRecords(path string) (map[string]addressRecords, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -64,6 +65,7 @@ func loadRecords(path string) (map[string]addressRecords, error) {
 	var entries map[string]struct {
 		A    string `json:"A"`
 		AAAA string `json:"AAAA"`
+		PTR  string `json:"PTR"`
 	}
 	if err := json.Unmarshal(data, &entries); err != nil {
 		return nil, fmt.Errorf("decode records: %w", err)
@@ -87,6 +89,14 @@ func loadRecords(path string) (map[string]addressRecords, error) {
 				return nil, fmt.Errorf("record %q: invalid IPv6 address %q", name, entry.AAAA)
 			}
 			addresses.AAAA = ip.To16()
+		}
+		if entry.PTR != "" {
+			target := strings.TrimSpace(entry.PTR)
+			// Validate DNS label lengths before accepting a PTR target.
+			if _, err := appendName(nil, target, make(map[string]uint16)); err != nil {
+				return nil, fmt.Errorf("record %q: invalid PTR target %q: %w", name, entry.PTR, err)
+			}
+			addresses.PTR = strings.TrimSuffix(target, ".") + "."
 		}
 		name = strings.ToLower(strings.TrimSpace(name))
 		if name == "" {
@@ -131,19 +141,24 @@ func handleQuery(packet []byte) ([]byte, error) {
 		response.Header.Flags.RCode = 3 // NXDOMAIN
 	}
 
-	var ip net.IP
+	var data []byte
 	if question.Class == 1 { // IN
 		switch question.Type {
 		case 1: // A
-			ip = addresses.A
+			data = addresses.A
 		case 28: // AAAA
-			ip = addresses.AAAA
+			data = addresses.AAAA
+		case 12: // PTR
+			data, err = handlePTR(addresses.PTR)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
-	if ip != nil {
+	if data != nil {
 		response.Answers = []ResourceRecord{{
 			Name: question.Name, Type: question.Type, Class: 1,
-			TTL: 60, Data: []byte(ip),
+			TTL: 60, Data: data,
 		}}
 	}
 
